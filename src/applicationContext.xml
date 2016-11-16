@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans-3.1.xsd 
+	http://www.springframework.org/schema/tx 
+	http://www.springframework.org/schema/tx/spring-tx.xsd
+	http://www.springframework.org/schema/context  
+    http://www.springframework.org/schema/context/spring-context-3.0.xsd  
+    http://www.springframework.org/schema/mvc  
+    http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd"
+	xmlns:tx="http://www.springframework.org/schema/tx">
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource">
+		<property name="url" value="jdbc:mysql://localhost:3306/course">
+		</property>
+		<property name="username" value="root"></property>
+		<property name="password" value="root"></property>
+	</bean>
+
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">
+					org.hibernate.dialect.MySQLDialect
+				</prop>
+				<prop key="hibernate.show_sql">
+					true
+				</prop>
+			</props>
+		</property>
+
+		<property name="annotatedClasses">
+			<list>
+				<value>
+					edu.zhangzl.hibernate_entity.Administrator
+				</value>
+				<value>
+					edu.zhangzl.hibernate_entity.ExecutiveStaff
+				</value></list>
+		</property></bean>
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<mvc:annotation-driven/>
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<context:component-scan base-package="edu.zhangzl.dao"></context:component-scan>
+	<context:component-scan base-package="edu.zhangzl.action"></context:component-scan>
+	<context:component-scan base-package="edu.zhangzl.service"></context:component-scan>
+	
+	<!-- 配置错误信息资源文件  当校验器校验错误时读取信息 -->
+	<bean id="messageSource" class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<property name="basename" value="/WEB-INF/resource/messages"></property>
+	</bean>
+	
+	<!-- 配置静态资源供页面访问 -->
+	<mvc:resources  location="/js/" mapping="/js/**"  />
+	<mvc:resources  location="/css/" mapping="/css/**"  />
+	<mvc:resources  location="/img/" mapping="/img/**"  />
+	<!-- 对模型视图名称的解析，即在模型视图名称添加前后缀 -->
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+	
+
+	<!-- 支持文件上传 -->
+	<bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<property name="maxUploadSize">
+			<value>1048576</value>
+		</property>
+	</bean>
+	
+	<bean id="registerDao" class="edu.zhangzl.dao.RegisterDao" >
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean id="auditDao" class="edu.zhangzl.dao.AuditDao">
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean id="loginDao" class="edu.zhangzl.dao.LoginDao" >
+		<property name="sessionFactory" ref="sessionFactory"></property>
+	</bean>
+	
+	<bean id="basicAction" class="edu.zhangzl.tools.BasicAction" ></bean>
+</beans>
